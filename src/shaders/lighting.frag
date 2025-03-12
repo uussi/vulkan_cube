@@ -15,7 +15,7 @@ layout(set = 0, binding = 4) uniform Directional_Light_Data {
     vec3 color;
 } directional;
 
-layout(location = 0) out vec4 f_color;
+layout(location = 0) out vec4 f_color; // Output for color attachment 0
 
 void main() {
     vec3 ambient_color = ambient.intensity * ambient.color;
@@ -23,6 +23,7 @@ void main() {
     float directional_intensity = max(dot(normalize(subpassLoad(u_normals).rgb), light_direction), 0.0);
     vec3 directional_color = directional_intensity * directional.color;
     vec3 combined_color = (ambient_color + directional_color) * subpassLoad(u_color).rgb;
-    f_color = vec4(combined_color, 1.0);
-}
 
+    f_color = vec4(combined_color, 1.0); // Output to location 0
+
+}

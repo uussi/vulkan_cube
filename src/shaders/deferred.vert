@@ -17,5 +17,5 @@ void main() {
     mat4 worldview = uniforms.view * uniforms.model;
     gl_Position = uniforms.projection * worldview * vec4(position, 1.0);
     out_color = color;
-    out_normal = mat3(uniforms.model) * normal;
+    out_normal = mat3(uniforms.model) * normal.xyz;
 }

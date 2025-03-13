@@ -15,3 +15,4 @@ void main() {
     gl_Position = uniforms.projection * worldview * vec4(position, 1.0);
     frag_pos = vec3(uniforms.model * vec4(position, 1.0));
 }
+

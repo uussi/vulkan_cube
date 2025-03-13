@@ -3,31 +3,29 @@ use std::{error::Error, rc, sync::Arc};
 use vulkano::{
     buffer::{Buffer, BufferContents, BufferCreateInfo, BufferUsage, Subbuffer},
     command_buffer::{
-        allocator::StandardCommandBufferAllocator, AutoCommandBufferBuilder,
-        CommandBufferUsage, RenderPassBeginInfo,
-        SubpassBeginInfo, SubpassContents, SubpassEndInfo,
+        allocator::StandardCommandBufferAllocator, AutoCommandBufferBuilder, CommandBufferUsage,
+        RenderPassBeginInfo, SubpassBeginInfo, SubpassContents, SubpassEndInfo,
     },
-    descriptor_set::{ allocator::StandardDescriptorSetAllocator, WriteDescriptorSet},
+    descriptor_set::{allocator::StandardDescriptorSetAllocator, WriteDescriptorSet},
     device::{
-        physical::PhysicalDeviceType, Device, DeviceCreateInfo, DeviceExtensions, 
-        Queue, QueueCreateInfo, QueueFlags,
+        physical::PhysicalDeviceType, Device, DeviceCreateInfo, DeviceExtensions, Queue,
+        QueueCreateInfo, QueueFlags,
     },
     format::Format,
-    image::{
-        view::ImageView, Image, ImageCreateInfo,
-        ImageUsage,
-    },
+    image::{view::ImageView, Image, ImageCreateInfo, ImageUsage},
     instance::{Instance, InstanceCreateFlags, InstanceCreateInfo},
     memory::allocator::{AllocationCreateInfo, MemoryTypeFilter, StandardMemoryAllocator},
     pipeline::{
         graphics::{
-            color_blend::{AttachmentBlend, BlendFactor, BlendOp, ColorBlendAttachmentState, ColorBlendState},
-            depth_stencil::{ CompareOp, DepthState, DepthStencilState},
+            color_blend::{
+                AttachmentBlend, BlendFactor, BlendOp, ColorBlendAttachmentState, ColorBlendState,
+            },
+            depth_stencil::{CompareOp, DepthState, DepthStencilState},
             input_assembly::InputAssemblyState,
             multisample::MultisampleState,
             rasterization::{CullMode, RasterizationState},
             vertex_input::{Vertex, VertexDefinition},
-            viewport::{ Viewport, ViewportState},
+            viewport::{Viewport, ViewportState},
             GraphicsPipelineCreateInfo,
         },
         layout::PipelineDescriptorSetLayoutCreateInfo,
@@ -85,13 +83,14 @@ struct RenderContext {
     images: Vec<Arc<Image>>,
     window: Arc<Window>,
     swapchain: Arc<Swapchain>,
-    framebuffer : Option<Arc<ImageView>>,
+    framebuffer: Option<Arc<ImageView>>,
     color_buffer: Option<Arc<ImageView>>,
     normal_buffer: Option<Arc<ImageView>>,
     render_pass: Arc<RenderPass>,
     framebuffers: Vec<Arc<Framebuffer>>,
     pipeline_01: Arc<GraphicsPipeline>,
     pipeline_02: Arc<GraphicsPipeline>,
+    pipeline_03: Arc<GraphicsPipeline>,
     viewport: Viewport,
     recreate_swapchain: bool,
     previous_frame_end: Option<Box<dyn GpuFuture>>,
@@ -106,7 +105,7 @@ impl App {
             library,
             InstanceCreateInfo {
                 flags: InstanceCreateFlags::ENUMERATE_PORTABILITY,
-                
+
                 enabled_extensions: required_extensions,
                 ..Default::default()
             },
@@ -176,188 +175,188 @@ impl App {
             // front face
             MyVertex {
                 position: [-1.000000, -1.000000, 1.000000],
-                normal: [0.0000, 0.0000, 1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, 1.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, 1.000000, 1.000000],
-                normal: [0.0000, 0.0000, 1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, 1.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, 1.000000, 1.000000],
-                normal: [0.0000, 0.0000, 1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, 1.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, -1.000000, 1.000000],
-                normal: [0.0000, 0.0000, 1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, 1.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, 1.000000, 1.000000],
-                normal: [0.0000, 0.0000, 1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, 1.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, -1.000000, 1.000000],
-                normal: [0.0000, 0.0000, 1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, 1.0],
+                color: [1.0, 1.0, 1.0],
             },
             // back face
             MyVertex {
                 position: [1.000000, -1.000000, -1.000000],
-                normal: [0.0000, 0.0000, -1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, -1.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, 1.000000, -1.000000],
-                normal: [0.0000, 0.0000, -1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, -1.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, 1.000000, -1.000000],
-                normal: [0.0000, 0.0000, -1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, -1.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, -1.000000, -1.000000],
-                normal: [0.0000, 0.0000, -1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, -1.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, 1.000000, -1.000000],
-                normal: [0.0000, 0.0000, -1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, -1.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, -1.000000, -1.000000],
-                normal: [0.0000, 0.0000, -1.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 0.0, -1.0],
+                color: [1.0, 1.0, 1.0],
             },
             // top face
             MyVertex {
                 position: [-1.000000, -1.000000, 1.000000],
-                normal: [0.0000, -1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, -1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, -1.000000, 1.000000],
-                normal: [0.0000, -1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, -1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, -1.000000, -1.000000],
-                normal: [0.0000, -1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, -1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, -1.000000, 1.000000],
-                normal: [0.0000, -1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, -1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, -1.000000, -1.000000],
-                normal: [0.0000, -1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, -1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, -1.000000, -1.000000],
-                normal: [0.0000, -1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, -1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             // bottom face
             MyVertex {
                 position: [1.000000, 1.000000, 1.000000],
-                normal: [0.0000, 1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, 1.000000, 1.000000],
-                normal: [0.0000, 1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, 1.000000, -1.000000],
-                normal: [0.0000, 1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, 1.000000, 1.000000],
-                normal: [0.0000, 1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, 1.000000, -1.000000],
-                normal: [0.0000, 1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, 1.000000, -1.000000],
-                normal: [0.0000, 1.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [0.0, 1.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             // left face
             MyVertex {
                 position: [-1.000000, -1.000000, -1.000000],
-                normal: [-1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [-1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, 1.000000, -1.000000],
-                normal: [-1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [-1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, 1.000000, 1.000000],
-                normal: [-1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [-1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, -1.000000, -1.000000],
-                normal: [-1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [-1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, 1.000000, 1.000000],
-                normal: [-1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [-1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [-1.000000, -1.000000, 1.000000],
-                normal: [-1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [-1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             // right face
             MyVertex {
                 position: [1.000000, -1.000000, 1.000000],
-                normal: [1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, 1.000000, 1.000000],
-                normal: [1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, 1.000000, -1.000000],
-                normal: [1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, -1.000000, 1.000000],
-                normal: [1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, 1.000000, -1.000000],
-                normal: [1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
             MyVertex {
                 position: [1.000000, -1.000000, -1.000000],
-                normal: [1.0000, 0.0000, 0.0000],
-                color: [1.0, 0.35, 0.137],
+                normal: [1.0, 0.0, 0.0],
+                color: [1.0, 1.0, 1.0],
             },
         ];
 
@@ -436,122 +435,134 @@ impl ApplicationHandler for App {
             )
             .unwrap()
         };
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-mod deferred_vert {
-    vulkano_shaders::shader!{
-        ty: "vertex",
-        path: "./shaders/deferred.vert",
-    }
-}
+        println!("{:?}", swapchain.image_format());
+        //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        mod deferred_vert {
+            vulkano_shaders::shader! {
+                ty: "vertex",
+                path: "./shaders/deferred.vert",
+            }
+        }
 
-mod deferred_frag {
-    vulkano_shaders::shader!{
-        ty: "fragment",
-        path: "./shaders/deferred.frag"
-    }
-}
+        mod deferred_frag {
+            vulkano_shaders::shader! {
+                ty: "fragment",
+                path: "./shaders/deferred.frag"
+            }
+        }
 
-mod lighting_vert {
-    vulkano_shaders::shader!{
-        ty: "vertex",
-        path: "./shaders/lighting.vert",
-    }
-}
+        mod directional_vert {
+            vulkano_shaders::shader! {
+                ty: "vertex",
+                path: "./shaders/directional.vert",
+            }
+        }
 
-mod lighting_frag {
-    vulkano_shaders::shader!{
-        ty: "fragment",
-        path:  "./shaders/lighting.frag",
-    }
-}
+        mod directional_frag {
+            vulkano_shaders::shader! {
+                ty: "fragment",
+                path:  "./shaders/directional.frag",
+            }
+        }
 
-let deferred_vert = deferred_vert::load(self.device.clone()).unwrap();
-let deferred_frag = deferred_frag::load(self.device.clone()).unwrap();
-let lighting_vert = lighting_vert::load(self.device.clone()).unwrap();
-let lighting_frag = lighting_frag::load(self.device.clone()).unwrap();
+        mod ambient_vert {
+            vulkano_shaders::shader! {
+                ty: "vertex",
+                path: "./shaders/ambient.vert",
+            }
+        }
 
+        mod ambient_frag {
+            vulkano_shaders::shader! {
+                ty: "fragment",
+                path:  "./shaders/ambient.frag",
+            }
+        }
 
-        
+        let deferred_vert = deferred_vert::load(self.device.clone()).unwrap();
+        let deferred_frag = deferred_frag::load(self.device.clone()).unwrap();
 
+        let directional_vert = directional_vert::load(self.device.clone()).unwrap();
+        let directional_frag = directional_frag::load(self.device.clone()).unwrap();
 
+        let ambient_vert = ambient_vert::load(self.device.clone()).unwrap();
+        let ambient_frag = ambient_frag::load(self.device.clone()).unwrap();
 
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-//         mod vs {{{{
-//             vulkano_shaders::shader! {
-//                 ty: "vertex",
-//
-//                   src: "
-//  #version 450
-//             layout(location = 0) in vec3 position;
-//             layout(location = 1) in vec3 normal;
-//             layout(location = 2) in vec3 color;
-//
-//             layout(location = 0) out vec3 out_color;
-//             layout(location = 1) out vec3 out_normal;
-//             layout(location = 2) out vec3 frag_pos;
-//
-//             layout(set = 0, binding = 0) uniform MVP_Data {
-//                 mat4 model;
-//                 mat4 view;
-//                 mat4 projection;
-//             } uniforms;
-//
-//             void main() {
-//                 mat4 worldview = uniforms.view * uniforms.model;
-//                 gl_Position = uniforms.projection * worldview * vec4(position, 1.0);
-//                 out_color = color;
-//                 out_normal = mat3(uniforms.model) * normal;
-//                 frag_pos = vec3(uniforms.model * vec4(position, 1.0));
-//             }
-//         "
-//             }
-//         }
-//
-//         mod fs {
-//             vulkano_shaders::shader! {
-//                 ty: "fragment",
-//                   src: "
-//             #version 450
-//             layout(location = 0) in vec3 in_color;
-// layout(location = 1) in vec3 in_normal;
-//
-// layout(location = 2) in vec3 frag_pos;
-//             layout(location = 0) out vec4 f_color;
-//
-//             layout(set = 0,binding=1) uniform Ambient_Data{
-//
-//             vec3 color;
-//             float intensity;
-//             } ambient;
-//
-//             layout(set = 0, binding = 2) uniform Directional_Light_Data {
-//                 vec4 position;
-//                 vec3 color;
-//             } directional;
-//
-//             void main() {
-//
-//     vec3 ambient_color = ambient.intensity * ambient.color;
-//     vec3 light_direction = normalize(directional.position.xyz - frag_pos);
-//     float directional_intensity = max(dot(in_normal, light_direction), 0.0);
-//     vec3 directional_color = directional_intensity * directional.color;
-//     vec3 combined_color = (ambient_color + directional_color) * in_color;
-//     f_color = vec4(combined_color, 1.0);
-//             }
-//         "
-//
-//             }
-//         }
-//}}}
-
-
+        //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        //         mod vs {{{{
+        //             vulkano_shaders::shader! {
+        //                 ty: "vertex",
+        //
+        //                   src: "
+        //  #version 450
+        //             layout(location = 0) in vec3 position;
+        //             layout(location = 1) in vec3 normal;
+        //             layout(location = 2) in vec3 color;
+        //
+        //             layout(location = 0) out vec3 out_color;
+        //             layout(location = 1) out vec3 out_normal;
+        //             layout(location = 2) out vec3 frag_pos;
+        //
+        //             layout(set = 0, binding = 0) uniform MVP_Data {
+        //                 mat4 model;
+        //                 mat4 view;
+        //                 mat4 projection;
+        //             } uniforms;
+        //
+        //             void main() {
+        //                 mat4 worldview = uniforms.view * uniforms.model;
+        //                 gl_Position = uniforms.projection * worldview * vec4(position, 1.0);
+        //                 out_color = color;
+        //                 out_normal = mat3(uniforms.model) * normal;
+        //                 frag_pos = vec3(uniforms.model * vec4(position, 1.0));
+        //             }
+        //         "
+        //             }
+        //         }
+        //
+        //         mod fs {
+        //             vulkano_shaders::shader! {
+        //                 ty: "fragment",
+        //                   src: "
+        //             #version 450
+        //             layout(location = 0) in vec3 in_color;
+        // layout(location = 1) in vec3 in_normal;
+        //
+        // layout(location = 2) in vec3 frag_pos;
+        //             layout(location = 0) out vec4 f_color;
+        //
+        //             layout(set = 0,binding=1) uniform Ambient_Data{
+        //
+        //             vec3 color;
+        //             float intensity;
+        //             } ambient;
+        //
+        //             layout(set = 0, binding = 2) uniform Directional_Light_Data {
+        //                 vec4 position;
+        //                 vec3 color;
+        //             } directional;
+        //
+        //             void main() {
+        //
+        //     vec3 ambient_color = ambient.intensity * ambient.color;
+        //     vec3 light_direction = normalize(directional.position.xyz - frag_pos);
+        //     float directional_intensity = max(dot(in_normal, light_direction), 0.0);
+        //     vec3 directional_color = directional_intensity * directional.color;
+        //     vec3 combined_color = (ambient_color + directional_color) * in_color;
+        //     f_color = vec4(combined_color, 1.0);
+        //             }
+        //         "
+        //
+        //             }
+        //         }
+        //}}}
 
         let render_pass = vulkano::ordered_passes_renderpass!(
             self.device.clone(),
@@ -570,7 +581,7 @@ let lighting_frag = lighting_frag::load(self.device.clone()).unwrap();
                     store_op:DontCare,
                 },
                 normals: {
-                    format: Format::R16G16B16A16_SFLOAT,
+                    format: Format::R8G8B8A8_UNORM,
                     samples:1,
                     load_op:Clear,
                     store_op:DontCare,
@@ -594,35 +605,30 @@ let lighting_frag = lighting_frag::load(self.device.clone()).unwrap();
                 depth_stencil: {},
                 input: [color, normals]
             }
-        
-        ]
-                
-        )
-        .unwrap();//}}}
-let deferred_pass = Subpass::from(render_pass.clone(), 0).unwrap();
-let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
 
-        let (mut framebuffers, mut color_buffer, mut normal_buffer)= window_size_dependent_setup(
+        ]
+
+        )
+        .unwrap(); //}}}
+        let deferred_pass = Subpass::from(render_pass.clone(), 0).unwrap();
+        let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
+
+        let (mut framebuffers, mut color_buffer, mut normal_buffer) = window_size_dependent_setup(
             &images,
             &render_pass,
             self.device.clone(),
             self.alloc.clone(),
             swapchain.clone(),
-
         );
-//--------------------------------------------------------------------
-//--------------------------------------------------------------------
-//--------------------------------------------------------------------
-//--------------------------------------------------------------------
-
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
 
         let pipeline_01 = {
-            let vs = deferred_vert
-                .entry_point("main")
-                .unwrap();
-            let fs = deferred_frag 
-                .entry_point("main")
-                .unwrap();
+            //{{{
+            let vs = deferred_vert.entry_point("main").unwrap();
+            let fs = deferred_frag.entry_point("main").unwrap();
 
             let vertex_input_state = MyVertex::per_vertex().definition(&vs).unwrap();
 
@@ -638,7 +644,6 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
                     .unwrap(),
             )
             .unwrap();
-
 
             GraphicsPipeline::new(
                 self.device.clone(),
@@ -681,16 +686,12 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
                 },
             )
             .unwrap()
-        };//}}}
-
+        }; //}}}}}}
 
         let pipeline_02 = {
-            let vs = lighting_vert
-                .entry_point("main")
-                .unwrap();
-            let fs = lighting_frag
-                .entry_point("main")
-                .unwrap();
+            //{{{
+            let vs = directional_vert.entry_point("main").unwrap();
+            let fs = directional_frag.entry_point("main").unwrap();
 
             let vertex_input_state = MyVertex::per_vertex().definition(&vs).unwrap();
 
@@ -706,7 +707,6 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
                     .unwrap(),
             )
             .unwrap();
-
 
             GraphicsPipeline::new(
                 self.device.clone(),
@@ -732,9 +732,84 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
 
                     multisample_state: Some(MultisampleState::default()),
 
-  color_blend_state: Some(ColorBlendState::with_attachment_states(
+                    color_blend_state: Some(ColorBlendState::with_attachment_states(
                         lighting_pass.num_color_attachments(),
-                        ColorBlendAttachmentState::default(),
+                        ColorBlendAttachmentState {
+                            blend: Some(AttachmentBlend {
+                                color_blend_op: BlendOp::Add,
+                                src_color_blend_factor: BlendFactor::One,
+                                dst_color_blend_factor: BlendFactor::One,
+                                alpha_blend_op: BlendOp::Max,
+                                src_alpha_blend_factor: BlendFactor::One,
+                                dst_alpha_blend_factor: BlendFactor::One,
+                            }),
+                            ..Default::default()
+                        },
+                    )),
+
+                    dynamic_state: [DynamicState::Viewport].into_iter().collect(),
+                    subpass: Some(lighting_pass.clone().into()),
+                    ..GraphicsPipelineCreateInfo::new(layout)
+                },
+            )
+            .unwrap()
+        }; //}}}
+
+        let pipeline_03 = {
+            let vs = ambient_vert.entry_point("main").unwrap();
+            let fs = ambient_frag.entry_point("main").unwrap();
+
+            let vertex_input_state = MyVertex::per_vertex().definition(&vs).unwrap();
+
+            let stages = [
+                PipelineShaderStageCreateInfo::new(vs),
+                PipelineShaderStageCreateInfo::new(fs),
+            ];
+
+            let layout = PipelineLayout::new(
+                self.device.clone(),
+                PipelineDescriptorSetLayoutCreateInfo::from_stages(&stages)
+                    .into_pipeline_layout_create_info(self.device.clone())
+                    .unwrap(),
+            )
+            .unwrap();
+
+            GraphicsPipeline::new(
+                self.device.clone(),
+                None,
+                GraphicsPipelineCreateInfo {
+                    stages: stages.into_iter().collect(),
+
+                    vertex_input_state: Some(vertex_input_state),
+
+                    input_assembly_state: Some(InputAssemblyState::default()),
+                    viewport_state: Some(ViewportState {
+                        viewports: [Viewport {
+                            offset: [0.0, 0.0],
+                            extent: window_size.into(),
+                            depth_range: 0.0..=1.0,
+                        }]
+                        .into_iter()
+                        .collect(),
+                        ..Default::default()
+                    }),
+
+                    rasterization_state: Some(RasterizationState::new().cull_mode(CullMode::Back)),
+
+                    multisample_state: Some(MultisampleState::default()),
+                    color_blend_state: Some(ColorBlendState::with_attachment_states(
+                        lighting_pass.num_color_attachments(),
+                        ColorBlendAttachmentState {
+                            blend: Some(AttachmentBlend {
+                                color_blend_op: BlendOp::Add,
+                                src_color_blend_factor: BlendFactor::One,
+                                dst_color_blend_factor: BlendFactor::One,
+                                alpha_blend_op: BlendOp::Max,
+                                src_alpha_blend_factor: BlendFactor::One,
+                                dst_alpha_blend_factor: BlendFactor::One,
+                            }),
+                            ..Default::default()
+                        },
                     )),
 
                     dynamic_state: [DynamicState::Viewport].into_iter().collect(),
@@ -745,13 +820,11 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
             .unwrap()
         };
 
-
-
-//--------------------------------------------------------------------
-//--------------------------------------------------------------------
-//--------------------------------------------------------------------
-//--------------------------------------------------------------------
-//--------------------------------------------------------------------
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
         // let pipeline = {{{{
         //     let vs = vs::load(self.device.clone())
         //         .unwrap()
@@ -837,19 +910,20 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
             window,
             swapchain,
             render_pass,
-            framebuffer:None,
-            normal_buffer:None,
-            color_buffer:None,
+            framebuffer: None,
+            normal_buffer: None,
+            color_buffer: None,
             framebuffers,
             pipeline_01,
             pipeline_02,
+            pipeline_03,
             viewport,
             recreate_swapchain,
             previous_frame_end,
         });
 
         self.rcx.as_mut().unwrap().color_buffer = Some(color_buffer.clone());
-        self.rcx.as_mut().unwrap().normal_buffer= Some(normal_buffer.clone());
+        self.rcx.as_mut().unwrap().normal_buffer = Some(normal_buffer.clone());
     }
 
     fn window_event(
@@ -888,20 +962,21 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
                     rcx.swapchain = new_swapchain;
 
                     rcx.images = new_images.clone();
-        let (mut framebuffers, mut color_buffer, mut normal_buffer)= window_size_dependent_setup(
-                        &new_images,
-                        &rcx.render_pass,
-                        self.device.clone(),
-                        self.alloc.clone(),
-                        rcx.swapchain.clone(),
-                    );
+                    let (mut framebuffers, mut color_buffer, mut normal_buffer) =
+                        window_size_dependent_setup(
+                            &new_images,
+                            &rcx.render_pass,
+                            self.device.clone(),
+                            self.alloc.clone(),
+                            rcx.swapchain.clone(),
+                        );
 
                     rcx.viewport.extent = window_size.into();
 
                     rcx.recreate_swapchain = false;
-        rcx.color_buffer = Some(color_buffer.clone());
-        rcx.normal_buffer= Some(normal_buffer.clone());
-        rcx.framebuffers = framebuffers;
+                    rcx.color_buffer = Some(color_buffer.clone());
+                    rcx.normal_buffer = Some(normal_buffer.clone());
+                    rcx.framebuffers = framebuffers;
                 }
 
                 let (image_index, suboptimal, acquire_future) = match acquire_next_image(
@@ -928,18 +1003,18 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
                     CommandBufferUsage::OneTimeSubmit,
                 )
                 .unwrap();
-//-------------------------------------------
+                //-------------------------------------------
 
-//-------------------------------------------
+                //-------------------------------------------
                 builder
                     .begin_render_pass(
                         RenderPassBeginInfo {
-                clear_values : vec![
-                    Some([0.1, 0.1, 0.0, 0.6].into()),
-                    Some([0.0, 0.0, 0.0, 1.0].into()),
-                    Some([0.0, 0.0, 0.0, 1.0].into()),
-                    Some(1.0.into()),
-                ],
+                            clear_values: vec![
+                                Some([0.0, 0.0, 0.0, 1.0].into()),
+                                Some([0.0, 0.0, 0.0, 1.0].into()),
+                                Some([0.0, 0.0, 0.0, 1.0].into()),
+                                Some(1.0.into()),
+                            ],
 
                             ..RenderPassBeginInfo::framebuffer(
                                 rcx.framebuffers[image_index as usize].clone(),
@@ -952,8 +1027,6 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
                     )
                     .unwrap()
                     .set_viewport(0, [rcx.viewport.clone()].into_iter().collect())
-                    .unwrap()
-                    .bind_pipeline_graphics(rcx.pipeline_01.clone())
                     .unwrap()
                     .bind_vertex_buffers(0, self.vertex_buffer.clone())
                     .unwrap();
@@ -969,7 +1042,7 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
                     Vec3::new(0.0, 0.0, 0.0),
                     Vec3::new(0.0, -1.0, 0.0),
                 );
-                let scale = Mat4::from_scale(Vec3::splat(0.03));
+                let scale = Mat4::from_scale(Vec3::splat(1.0));
 
                 let rotation = self.time_e.elapsed().as_secs() as f64
                     + self.time_e.elapsed().subsec_nanos() as f64 / 1_000_000_000.0;
@@ -977,7 +1050,7 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
                 let rotation_x = Mat4::from_rotation_x((rotation) as f32);
                 let rotation_z = Mat4::from_rotation_z((rotation) as f32);
 
-                let tranlate = Mat4::from_translation(Vec3::new(0.0, 0.0, -50.0));
+                let tranlate = Mat4::from_translation(Vec3::new(0.0, 0.0, -4.0));
 
                 mvp.projection = proj.to_cols_array_2d();
                 mvp.view = (scale * view).to_cols_array_2d();
@@ -1018,11 +1091,11 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
 
                 let light = AmbientLight {
                     color: [1.0, 1.0, 1.0],
-                    intensity: 0.4,
+                    intensity: 0.1,
                 };
                 let directional_light = DirectionalLight {
-                    position: [-3.0, -4.0, 0.0],
-                    color: [1.0, 1.0, 1.0],
+                    position: [5.0, 0.0, 3.0],
+                    color: [0.4, 0.1, 0.1],
                 };
                 let direct_light_buf = Buffer::from_data(
                     memory_allocator.clone(),
@@ -1052,37 +1125,44 @@ let lighting_pass = Subpass::from(render_pass.clone(), 1).unwrap();
                     light,
                 );
 
-
-
-let deferred_layout =rcx.pipeline_01.layout().set_layouts().get(0).unwrap();
-let lighting_layout =rcx.pipeline_02.layout().set_layouts().get(0).unwrap();
-
+                let deferred_layout = rcx.pipeline_01.layout().set_layouts().get(0).unwrap();
+                let lighting_layout = rcx.pipeline_02.layout().set_layouts().get(0).unwrap();
+                let ambient_layout = rcx.pipeline_03.layout().set_layouts().get(0).unwrap();
 
                 let descriptor_set_deferred = vulkano::descriptor_set::DescriptorSet::new(
                     descriptor_set_allocator.clone(),
                     deferred_layout.clone(),
-                    [
-                        // WriteDescriptorSet::buffer(1, ambient_subbuffer.unwrap().clone()),
-                        WriteDescriptorSet::buffer(0, uniform.clone()),
-                        // WriteDescriptorSet::buffer(2, direct_light_buf.unwrap().clone()),
-                    ],
+                    [WriteDescriptorSet::buffer(0, uniform.clone())],
                     [],
                 )
                 .unwrap();
+
+
                 let descriptor_set_lighting = vulkano::descriptor_set::DescriptorSet::new(
                     descriptor_set_allocator.clone(),
                     lighting_layout.clone(),
                     [
-                    
-        WriteDescriptorSet::image_view(0,rcx.color_buffer.clone().unwrap()),
-        WriteDescriptorSet::image_view(1,rcx.normal_buffer.clone().unwrap()),
-        WriteDescriptorSet::buffer(2, uniform.clone()),
-        WriteDescriptorSet::buffer(3,ambient_subbuffer.unwrap().clone()),
-        WriteDescriptorSet::buffer(4, direct_light_buf.unwrap().clone()),
+                        WriteDescriptorSet::image_view(0, rcx.color_buffer.clone().unwrap()),
+                        WriteDescriptorSet::image_view(1, rcx.normal_buffer.clone().unwrap()),
+                        WriteDescriptorSet::buffer(2, uniform.clone()),
+                        WriteDescriptorSet::buffer(3, direct_light_buf.unwrap().clone()),
                     ],
                     [],
                 )
                 .unwrap();
+
+                let descriptor_set_ambient = vulkano::descriptor_set::DescriptorSet::new(
+                    descriptor_set_allocator.clone(),
+                    ambient_layout.clone(),
+                    [
+                        WriteDescriptorSet::image_view(0, rcx.color_buffer.clone().unwrap()),
+                        WriteDescriptorSet::buffer(2, uniform.clone()),
+                        WriteDescriptorSet::buffer(3, ambient_subbuffer.unwrap().clone()),
+                    ],
+                    [],
+                )
+                .unwrap();
+                builder.bind_pipeline_graphics(rcx.pipeline_01.clone()).unwrap();
                 builder
                     .bind_descriptor_sets(
                         vulkano::pipeline::PipelineBindPoint::Graphics,
@@ -1092,8 +1172,11 @@ let lighting_layout =rcx.pipeline_02.layout().set_layouts().get(0).unwrap();
                     )
                     .unwrap();
 
+                    builder.bind_vertex_buffers(0, self.vertex_buffer.clone());
                 unsafe { builder.draw(self.vertex_buffer.len() as u32, 1, 0, 0) }.unwrap();
-                builder.next_subpass(SubpassEndInfo::new(),SubpassBeginInfo::new());
+                builder.next_subpass(SubpassEndInfo::new(), SubpassBeginInfo::new()).unwrap();
+
+                builder.bind_pipeline_graphics(rcx.pipeline_02.clone());
                 builder
                     .bind_descriptor_sets(
                         vulkano::pipeline::PipelineBindPoint::Graphics,
@@ -1103,8 +1186,21 @@ let lighting_layout =rcx.pipeline_02.layout().set_layouts().get(0).unwrap();
                     )
                     .unwrap();
 
-                               
-               unsafe{ builder.draw(self.vertex_buffer.len() as u32, 1, 0, 0)}.unwrap();
+                    builder.bind_vertex_buffers(0, self.vertex_buffer.clone());
+                unsafe { builder.draw(self.vertex_buffer.len() as u32, 1, 0, 0) }.unwrap();
+
+                builder
+                    .bind_pipeline_graphics(rcx.pipeline_03.clone())
+                    .unwrap()
+                    .bind_descriptor_sets(
+                        vulkano::pipeline::PipelineBindPoint::Graphics,
+                        rcx.pipeline_03.layout().clone(),
+                        0,
+                        descriptor_set_ambient,
+                    ).unwrap();
+
+                unsafe { builder.draw(self.vertex_buffer.len() as u32, 1, 0, 0) }.unwrap();
+
                 builder.end_render_pass(Default::default()).unwrap();
 
                 let command_buffer = builder.build().unwrap();
@@ -1145,15 +1241,15 @@ let lighting_layout =rcx.pipeline_02.layout().set_layouts().get(0).unwrap();
     }
 }
 
-#[derive(BufferContents, Vertex,Clone, Copy,Debug)]
+#[derive(BufferContents, Vertex)]
 #[repr(C)]
 struct MyVertex {
-    #[format(R32G32B32A32_SFLOAT)]
+    #[format(R32G32B32_SFLOAT)]
     position: [f32; 3],
     #[format(R32G32B32_SFLOAT)]
     normal: [f32; 3],
 
-    #[format(R16G16B16A16_SFLOAT)]
+    #[format(R32G32B32_SFLOAT)]
     color: [f32; 3],
 }
 #[derive(Default, Debug, Clone, BufferContents)]
@@ -1174,22 +1270,14 @@ fn window_size_dependent_setup(
     render_pass: &Arc<RenderPass>,
     device: Arc<Device>,
     allocator: Arc<StandardMemoryAllocator>,
-    rcx:Arc<Swapchain>,
-) -> (
-    Vec<Arc<Framebuffer>>,
-    Arc<ImageView>,
-    Arc<ImageView>,
-){
+    rcx: Arc<Swapchain>,
+) -> (Vec<Arc<Framebuffer>>, Arc<ImageView>, Arc<ImageView>) {
     let allocator = allocator;
-
-
 
     let all_info = AllocationCreateInfo {
         memory_type_filter: MemoryTypeFilter::PREFER_DEVICE,
         ..Default::default()
     };
-
-
 
     let dimensions = images[0].extent();
     let info = ImageCreateInfo {
@@ -1201,61 +1289,35 @@ fn window_size_dependent_setup(
     };
 
     let depth_buffer =
-        ImageView::new_default(Image::new(allocator.clone(), info, all_info.clone()).unwrap()).unwrap();
+        ImageView::new_default(Image::new(allocator.clone(), info, all_info.clone()).unwrap())
+            .unwrap();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    let  color_buffer = ImageCreateInfo {
+    let color_buffer = ImageCreateInfo {
         image_type: vulkano::image::ImageType::Dim2d,
         extent: dimensions,
         format: rcx.image_format(),
-        usage: ImageUsage::COLOR_ATTACHMENT| ImageUsage::INPUT_ATTACHMENT,
+        usage: ImageUsage::COLOR_ATTACHMENT | ImageUsage::INPUT_ATTACHMENT,
         ..Default::default()
     };
 
-    let color_bi =
-        ImageView::new_default(Image::new(allocator.clone(),color_buffer, all_info.clone()).unwrap()).unwrap();
+    let color_bi = ImageView::new_default(
+        Image::new(allocator.clone(), color_buffer, all_info.clone()).unwrap(),
+    )
+    .unwrap();
 
-    let  normal_buffer = ImageCreateInfo {
+    let normal_buffer = ImageCreateInfo {
         image_type: vulkano::image::ImageType::Dim2d,
         extent: dimensions,
-        format: Format::R16G16B16_SFLOAT,
-        usage: ImageUsage::COLOR_ATTACHMENT| ImageUsage::INPUT_ATTACHMENT,
+        format: Format::R8G8B8A8_UNORM,
+        usage: ImageUsage::COLOR_ATTACHMENT | ImageUsage::INPUT_ATTACHMENT,
         ..Default::default()
     };
-    let normal_bi=
-        ImageView::new_default(Image::new(allocator.clone(),normal_buffer, all_info.clone()).unwrap()).unwrap();
+    let normal_bi = ImageView::new_default(
+        Image::new(allocator.clone(), normal_buffer, all_info.clone()).unwrap(),
+    )
+    .unwrap();
 
-
-
-
-
-
-
-
-
-
-
-   let framebuffers =  images
+    let framebuffers = images
         .iter()
         .map(|image| {
             let view = ImageView::new_default(image.clone()).unwrap();
@@ -1276,5 +1338,5 @@ fn window_size_dependent_setup(
         })
         .collect::<Vec<_>>();
 
-         (framebuffers,color_bi.clone(),normal_bi.clone())
+    (framebuffers, color_bi.clone(), normal_bi.clone())
 }
